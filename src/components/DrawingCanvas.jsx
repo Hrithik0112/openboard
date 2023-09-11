@@ -26,6 +26,20 @@ function DrawingCanvas() {
     } else if (drawingState.current.tool === "line") {
       drawingState.current.startX = offsetX;
       drawingState.current.startY = offsetY;
+    } else if (drawingState.current.tool === "arrow") {
+      // Call drawArrow with start and end coordinates
+      if (!drawingState.current.startX || !drawingState.current.startY) {
+        // If startX or startY is not set, set them as the current click coordinates
+        drawingState.current.startX = offsetX;
+        drawingState.current.startY = offsetY;
+      } else {
+        // If startX and startY are already set, call drawArrow
+        drawArrow(drawingState.current.startX, drawingState.current.startY, offsetX, offsetY);
+
+        // Reset startX and startY for the next arrow
+        drawingState.current.startX = null;
+        drawingState.current.startY = null;
+      }
     }
   };
 
@@ -63,6 +77,22 @@ function DrawingCanvas() {
     drawingState.current.tool = tool;
   };
 
+  const drawArrow = (startX, startY, endX, endY) => {
+    const roughArrow = drawing.line(startX, startY, endX, endY, {
+      stroke: "black",
+      strokeWidth: 2,
+    });
+
+    // Add arrowhead to the line
+    const arrowhead = drawing.line(endX - 10, endY - 10, endX, endY, {
+      stroke: "black",
+      strokeWidth: 2,
+    });
+
+    drawingState.current.elements.push(roughArrow, arrowhead);
+    redrawCanvas();
+  };
+
   return (
     <div>
       <canvas
@@ -74,6 +104,7 @@ function DrawingCanvas() {
       ></canvas>
       <button onClick={() => setTool("rectangle")}>Add Rectangle</button>
       <button onClick={() => setTool("line")}>Add Line</button>
+      <button onClick={() => setTool("arrow")}>Add Arrow</button>
     </div>
   );
 }
